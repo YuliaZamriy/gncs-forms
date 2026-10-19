@@ -1,0 +1,696 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GNCS Enrollment Packet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400;500;600;700&display=swap">
+<script src="pdf-lib.min.js"></script>
+<script src="fontkit.umd.min.js"></script>
+<style>
+/* Layout: one calm column of numbered form sections, a sticky progress rail on wide screens, and a "make the forms" panel at the end. */
+:root{
+  --bg:#f6f7f2; --surface:#ffffff; --ink:#1f2a1c; --muted:#5d6858; --line:#d9ddd0;
+  --accent:#4f7a35; --accent-ink:#ffffff; --accent-soft:#e7efdf; --warn:#9a5b12; --warn-soft:#fbf0de;
+  --focus:#2f6fb0;
+  --f-display:"Young Serif", Georgia, "Times New Roman", serif;
+  --f-body:"Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#141812; --surface:#1d231a; --ink:#e7ecdf; --muted:#a3ae9a; --line:#33402d;
+  --accent:#8fbf6c; --accent-ink:#11180d; --accent-soft:#25331d; --warn:#e7b064; --warn-soft:#352812; --focus:#7fb3ea; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141812; --surface:#1d231a; --ink:#e7ecdf; --muted:#a3ae9a; --line:#33402d;
+  --accent:#8fbf6c; --accent-ink:#11180d; --accent-soft:#25331d; --warn:#e7b064; --warn-soft:#352812; --focus:#7fb3ea; color-scheme:dark}
+*{box-sizing:border-box}
+html{color-scheme:light}
+[hidden]{display:none!important}
+img{max-width:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 64px}
+.wrap{max-width:1040px;margin:0 auto;display:grid;grid-template-columns:220px minmax(0,1fr);gap:40px}
+@media (max-width:820px){.wrap{grid-template-columns:minmax(0,1fr)} nav.rail{display:none}}
+header.top{max-width:1040px;margin:0 auto;padding-block:40px 28px}
+.eyebrow{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);font-weight:600;margin:0 0 6px}
+h1{font-family:var(--f-display);font-weight:400;font-size:clamp(30px,5vw,42px);line-height:1.1;margin:0 0 12px;text-wrap:balance}
+.lede{max-width:62ch;color:var(--muted);margin:0}
+.outputs{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 14px;font-size:14px}
+.chip b{font-weight:600}
+nav.rail{position:sticky;top:calc(env(safe-area-inset-top,0px) + 20px);align-self:start;padding-top:6px}
+nav.rail ol{list-style:none;margin:0;padding:0;display:grid;gap:2px;counter-reset:s}
+nav.rail a{display:flex;gap:10px;align-items:baseline;padding:7px 10px;border-radius:8px;color:var(--muted);text-decoration:none;font-size:15px}
+nav.rail a:hover{background:var(--accent-soft);color:var(--ink)}
+nav.rail a span{font-variant-numeric:tabular-nums;font-size:13px;color:var(--accent);font-weight:600;min-width:1.2em}
+main{min-width:0;display:grid;gap:28px}
+section.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:24px clamp(16px,3vw,32px) 28px}
+section.card > h2{font-family:var(--f-display);font-weight:400;font-size:24px;margin:0 0 4px;display:flex;gap:12px;align-items:baseline}
+section.card > h2 .n{font-family:var(--f-body);font-size:14px;font-weight:700;color:var(--accent)}
+.sub{color:var(--muted);margin:0 0 20px;font-size:15px;max-width:64ch}
+h3{font-size:15px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin:26px 0 12px;padding-top:18px;border-top:1px dashed var(--line)}
+h3:first-of-type{border-top:0;padding-top:0;margin-top:6px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 18px}
+.grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media (max-width:620px){.grid,.grid.three{grid-template-columns:minmax(0,1fr)}}
+.full{grid-column:1/-1}
+label.f{display:grid;gap:5px;font-size:14px;font-weight:600;min-width:0}
+label.f small{font-weight:400;color:var(--muted)}
+input[type=text],input[type=email],input[type=tel],input[type=date],textarea{width:100%;font:inherit;font-weight:400;font-size:16px;color:var(--ink);background:var(--bg);
+  border:1px solid var(--line);border-radius:9px;padding:9px 11px;min-width:0}
+textarea{min-height:76px;resize:vertical}
+input:focus-visible,textarea:focus-visible,button:focus-visible,.opt input:focus-visible+span{outline:2px solid var(--focus);outline-offset:2px}
+fieldset{border:0;margin:0;padding:0;min-width:0}
+legend{font-size:14px;font-weight:600;padding:0;margin-bottom:6px}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opt{position:relative}
+.opt input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.opt span{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:6px 13px;font-size:14px;background:var(--bg);cursor:pointer;user-select:none}
+.opt input:checked+span{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.check{display:flex;gap:8px;align-items:center;font-size:14px;color:var(--muted)}
+.check input{width:18px;height:18px;accent-color:var(--accent)}
+.yn{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.yn:last-child{border-bottom:0}
+.yn p{margin:0;max-width:60ch;font-size:15px}
+.contact{border:1px solid var(--line);border-radius:12px;padding:16px;margin-top:12px}
+.contact h4{margin:0 0 12px;font-size:15px}
+.note{background:var(--accent-soft);border-radius:10px;padding:10px 14px;font-size:14px;margin:0 0 16px}
+.make{border:2px solid var(--accent)}
+.btns{display:flex;flex-wrap:wrap;gap:12px;margin-top:16px}
+button{font:inherit;font-weight:600;border-radius:10px;padding:12px 18px;cursor:pointer;border:1px solid var(--accent)}
+button.primary{background:var(--accent);color:var(--accent-ink)}
+button.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+button[disabled]{opacity:.55;cursor:progress}
+.status{margin-top:14px;font-size:14px;min-height:1.5em}
+.missing{background:var(--warn-soft);color:var(--warn);border-radius:10px;padding:10px 14px;font-size:14px;margin-top:12px}
+.missing a{color:inherit}
+.confirm{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:14px;margin-top:10px}
+.foot{color:var(--muted);font-size:13px;margin-top:10px}
+</style>
+</head>
+<body>
+
+
+<header class="top">
+  <p class="eyebrow">Great Neck Community School</p>
+  <h1>Enrollment packet</h1>
+  <p class="lede">Fill this in once. When you're done, it creates both enrollment forms for your child as PDFs, ready to print or email to the school.</p>
+  <div class="outputs">
+    <span class="chip"><b>OCFS-LDSS-0792</b> Day Care Enrollment (NY State form)</span>
+    <span class="chip"><b>New Student Information Form</b> (GNCS)</span>
+  </div>
+</header>
+
+<div class="wrap">
+<nav class="rail" aria-label="Sections">
+  <ol>
+    <li><a href="#child"><span>1</span>Your child</a></li>
+    <li><a href="#parents"><span>2</span>Parents &amp; guardians</a></li>
+    <li><a href="#emergency"><span>3</span>Emergency &amp; pick-up</a></li>
+    <li><a href="#health"><span>4</span>Health &amp; medical</a></li>
+    <li><a href="#about"><span>5</span>About your child</a></li>
+    <li><a href="#agree"><span>6</span>Agreements &amp; signature</a></li>
+    <li><a href="#make"><span>7</span>Create the forms</a></li>
+  </ol>
+</nav>
+
+<main>
+<form id="f" autocomplete="on" novalidate>
+
+<section class="card" id="child">
+  <h2><span class="n">1</span>Your child</h2>
+  <p class="sub">This information appears on both forms.</p>
+  <div class="grid">
+    <label class="f">Child's full name<input type="text" id="child_name" name="child_name" autocomplete="off"></label>
+    <label class="f">Preferred name or nickname<input type="text" id="child_nick" name="child_nick" autocomplete="off"></label>
+    <label class="f">Date of birth<input type="date" id="child_dob" name="child_dob"></label>
+    <label class="f">Gender<input type="text" id="child_gender" name="child_gender" autocomplete="off"></label>
+    <label class="f full">Child's home address<input type="text" id="child_address" name="child_address" placeholder="Street, town, state, ZIP"></label>
+    <fieldset class="full"><legend>Program</legend><div class="opts">
+      <label class="opt"><input type="radio" name="program" value="twos"><span>Twos</span></label>
+      <label class="opt"><input type="radio" name="program" value="threes"><span>Threes</span></label>
+      <label class="opt"><input type="radio" name="program" value="fours"><span>Fours</span></label>
+    </div></fieldset>
+    <label class="f full">Previous group or school experience<textarea id="prev_school" name="prev_school"></textarea></label>
+    <label class="f">Primary language spoken at home<input type="text" id="language" name="language"></label>
+    <label class="f">Siblings' names and ages<input type="text" id="siblings" name="siblings"></label>
+    <fieldset><legend>Is your child adopted?</legend><div class="opts">
+      <label class="opt"><input type="radio" name="adopted" value="yes"><span>Yes</span></label>
+      <label class="opt"><input type="radio" name="adopted" value="no"><span>No</span></label>
+    </div></fieldset>
+  </div>
+</section>
+
+<section class="card" id="parents">
+  <h2><span class="n">2</span>Parents &amp; guardians</h2>
+  <p class="sub">Please fill in both parents or guardians if there is more than one. Guardians are legal guardians. List grandparents or other relatives as emergency contacts.</p>
+  <h3>Parent / guardian 1 <small style="text-transform:none;letter-spacing:0;font-weight:400">(the person enrolling the child)</small></h3>
+  <div class="grid">
+    <label class="f">Full name<input type="text" id="p1_name" name="p1_name"></label>
+    <label class="f">Occupation<input type="text" id="p1_occ" name="p1_occ"></label>
+    <fieldset class="full"><legend>Relationship to child</legend><div class="opts">
+      <label class="opt"><input type="radio" name="p1_rel" value="Parent"><span>Parent</span></label>
+      <label class="opt"><input type="radio" name="p1_rel" value="Guardian"><span>Guardian</span></label>
+      <label class="opt"><input type="radio" name="p1_rel" value="Caretaker"><span>Caretaker</span></label>
+      <label class="opt"><input type="radio" name="p1_rel" value="Relative"><span>Relative</span></label>
+      <label class="opt"><input type="radio" name="p1_rel" value="Other"><span>Other</span></label>
+    </div></fieldset>
+    <label class="f full" id="p1_rel_other_wrap" hidden>If relative or other, please describe<input type="text" id="p1_rel_other" name="p1_rel_other" placeholder="e.g. Grandmother"></label>
+    <label class="check full"><input type="checkbox" id="p1_same" name="p1_same" checked> Lives at the child's home address</label>
+    <label class="f full" id="p1_address_wrap" hidden>Home address<input type="text" id="p1_address" name="p1_address"></label>
+    <label class="f">Cell phone<input type="tel" id="p1_cell" name="p1_cell" placeholder="(516) 555-0123"></label>
+    <label class="f">Work phone<input type="tel" id="p1_work" name="p1_work"></label>
+    <label class="check full"><input type="checkbox" id="p1_text" name="p1_text"> OK to text the cell phone</label>
+    <label class="f full">Email<input type="email" id="p1_email" name="p1_email"></label>
+  </div>
+  <h3>Parent / guardian 2</h3>
+  <div class="grid">
+    <label class="f">Full name<input type="text" id="p2_name" name="p2_name"></label>
+    <label class="f">Occupation<input type="text" id="p2_occ" name="p2_occ"></label>
+    <label class="check full"><input type="checkbox" id="p2_same" name="p2_same" checked> Lives at the child's home address</label>
+    <label class="f full" id="p2_address_wrap" hidden>Home address<input type="text" id="p2_address" name="p2_address"></label>
+    <label class="f">Cell phone<input type="tel" id="p2_cell" name="p2_cell"></label>
+    <label class="f">Work phone<input type="tel" id="p2_work" name="p2_work"></label>
+    <label class="f full">Email<input type="email" id="p2_email" name="p2_email"></label>
+  </div>
+</section>
+
+<section class="card" id="emergency">
+  <h2><span class="n">3</span>Emergency contacts &amp; pick-up</h2>
+  <p class="sub">The school always tries to reach parents first. Emergency contacts should be someone other than a parent, such as a relative, friend or neighbor. Please list at least two.</p>
+  <div id="contacts"></div>
+  <h3>Anyone else allowed to pick up your child</h3>
+  <p class="sub">Emergency contacts you marked as allowed to pick up are added to the pick-up list automatically. Add anyone else here.</p>
+  <div id="pickups"></div>
+</section>
+
+<section class="card" id="health">
+  <h2><span class="n">4</span>Health &amp; medical</h2>
+  <div class="grid">
+    <fieldset class="full"><legend>Does your child have any special needs or services?</legend><div class="opts">
+      <label class="opt"><input type="radio" name="sn" value="yes"><span>Yes</span></label>
+      <label class="opt"><input type="radio" name="sn" value="no"><span>No</span></label>
+    </div></fieldset>
+    <fieldset class="full" id="sn_detail" hidden><legend>Check all that apply</legend><div class="opts">
+      <label class="opt"><input type="checkbox" name="sn_ei"><span>Early Intervention / Special Education</span></label>
+      <label class="opt"><input type="checkbox" name="sn_ot"><span>Occupational therapy</span></label>
+      <label class="opt"><input type="checkbox" name="sn_speech"><span>Speech / language</span></label>
+      <label class="opt"><input type="checkbox" name="sn_pt"><span>Physical therapy</span></label>
+    </div></fieldset>
+    <label class="f full" id="sn_other_wrap" hidden>Other special needs or services<input type="text" id="sn_other" name="sn_other"></label>
+    <label class="f full" id="sn_info_wrap" hidden>Anything the program should know about these needs<input type="text" id="sn_info" name="sn_info"></label>
+  </div>
+  <h3>Allergies</h3>
+  <div class="grid">
+    <label class="f full">Allergies <small>Leave blank if none</small><input type="text" id="allergies" name="allergies"></label>
+    <fieldset><legend>EpiPen needed?</legend><div class="opts">
+      <label class="opt"><input type="radio" name="epipen" value="yes"><span>Yes</span></label>
+      <label class="opt"><input type="radio" name="epipen" value="no"><span>No</span></label>
+    </div></fieldset>
+    <fieldset><legend>Benadryl needed?</legend><div class="opts">
+      <label class="opt"><input type="radio" name="benadryl" value="yes"><span>Yes</span></label>
+      <label class="opt"><input type="radio" name="benadryl" value="no"><span>No</span></label>
+    </div></fieldset>
+    <label class="f full">Symptoms your child shows during an allergic reaction<textarea id="al_symptoms" name="al_symptoms"></textarea></label>
+  </div>
+  <h3>Medical conditions</h3>
+  <div class="grid">
+    <label class="f full">Medical conditions<textarea id="med_conditions" name="med_conditions"></textarea></label>
+    <label class="f full">Treatment<textarea id="med_treatment" name="med_treatment"></textarea></label>
+  </div>
+  <h3>Doctors &amp; hospital</h3>
+  <div class="grid">
+    <label class="f">Pediatrician / primary care (name or group)<input type="text" id="ped_name" name="ped_name"></label>
+    <label class="f">Pediatrician phone<input type="tel" id="ped_phone" name="ped_phone"></label>
+    <label class="f">Pediatrician email<input type="email" id="ped_email" name="ped_email"></label>
+    <label class="f">Pediatrician address<input type="text" id="ped_address" name="ped_address"></label>
+    <label class="f">Preferred hospital<input type="text" id="hospital" name="hospital"></label>
+    <label class="f">Hospital phone<input type="tel" id="hospital_phone" name="hospital_phone"></label>
+    <label class="f">Dentist<input type="text" id="dentist" name="dentist"></label>
+    <label class="f">Dentist phone<input type="tel" id="dentist_phone" name="dentist_phone"></label>
+  </div>
+</section>
+
+<section class="card" id="about">
+  <h2><span class="n">5</span>About your child</h2>
+  <p class="sub">Used for the school's New Student Information Form only.</p>
+  <h3>Separation</h3>
+  <div class="grid">
+    <label class="f full">How does your child act when you leave him/her?<textarea id="soc_leave" name="soc_leave"></textarea></label>
+    <label class="f full">Who do you leave your child with when you go out?<input type="text" id="soc_who" name="soc_who"></label>
+    <label class="f full">What reaction do you expect when you drop your child off at school?<textarea id="soc_reaction" name="soc_reaction"></textarea></label>
+    <label class="f full">How often do you leave your child?<input type="text" id="soc_often" name="soc_often"></label>
+    <fieldset class="full"><legend>Materials your child has worked with before</legend><div class="opts" id="materials"></div></fieldset>
+  </div>
+  <h3>Personality</h3>
+  <fieldset><legend>Words that best describe your child</legend><div class="opts" id="descriptors"></div></fieldset>
+  <div class="grid" style="margin-top:14px"><label class="f full">Other words<input type="text" id="desc_other" name="desc_other"></label></div>
+  <h3>Sleep &amp; toileting</h3>
+  <div class="grid">
+    <fieldset><legend>Sleeps through the night?</legend><div class="opts">
+      <label class="opt"><input type="radio" name="sleep_night" value="yes"><span>Yes</span></label>
+      <label class="opt"><input type="radio" name="sleep_night" value="no"><span>No</span></label></div></fieldset>
+    <fieldset><legend>Naps during the day?</legend><div class="opts">
+      <label class="opt"><input type="radio" name="nap" value="yes"><span>Yes</span></label>
+      <label class="opt"><input type="radio" name="nap" value="no"><span>No</span></label></div></fieldset>
+    <label class="f">Nap time<input type="text" id="nap_time" name="nap_time" placeholder="e.g. 1:00 pm"></label>
+    <label class="f">How long the nap lasts<input type="text" id="nap_length" name="nap_length" placeholder="e.g. 1½ hours"></label>
+    <label class="f">Word your child uses for urination<input type="text" id="word_urine" name="word_urine"></label>
+    <label class="f">Word your child uses for a bowel movement<input type="text" id="word_bm" name="word_bm"></label>
+    <fieldset><legend>Toilet trained?</legend><div class="opts">
+      <label class="opt"><input type="radio" name="toilet" value="yes"><span>Yes</span></label>
+      <label class="opt"><input type="radio" name="toilet" value="no"><span>No</span></label></div></fieldset>
+    <label class="f">Age when toilet trained<input type="text" id="toilet_age" name="toilet_age"></label>
+    <fieldset><legend>Ever has accidents?</legend><div class="opts">
+      <label class="opt"><input type="radio" name="accidents" value="yes"><span>Yes</span></label>
+      <label class="opt"><input type="radio" name="accidents" value="no"><span>No</span></label></div></fieldset>
+  </div>
+  <h3>At home</h3>
+  <div class="grid">
+    <label class="f full">What discipline methods do you use at home?<textarea id="discipline" name="discipline"></textarea></label>
+    <label class="f full">Is there anything else you would like us to know about your child?<textarea id="anything" name="anything"></textarea></label>
+  </div>
+</section>
+
+<section class="card" id="agree">
+  <h2><span class="n">6</span>Agreements &amp; signature</h2>
+  <div id="agreements"></div>
+  <h3>Signature</h3>
+  <div class="grid">
+    <label class="f">Type your full name to sign <small>Or leave blank and sign the printed forms by hand</small><input type="text" id="sig_name" name="sig_name" autocomplete="off"></label>
+    <label class="f">Date<input type="date" id="sig_date" name="sig_date"></label>
+  </div>
+</section>
+
+<section class="card make" id="make">
+  <h2><span class="n">7</span>Create the forms</h2>
+  <p class="sub">Each button makes one PDF and saves it to your computer or phone. Nothing you type here is sent anywhere. When you have both PDFs, email them to the school or print and sign them.</p>
+  <div id="missing" class="missing" hidden></div>
+  <div class="btns">
+    <button type="button" class="primary" id="b0792">Save the state form (OCFS-LDSS-0792)</button>
+    <button type="button" class="primary" id="bnsif">Save the Student Information Form</button>
+  </div>
+  <div class="status" id="status" role="status" aria-live="polite"></div>
+  <div class="btns" style="margin-top:22px">
+    <button type="button" class="ghost" id="bclear">Clear all answers</button>
+  </div>
+  <div class="confirm" id="clearconfirm" hidden>
+    <span>Erase everything on this page?</span>
+    <button type="button" class="primary" id="bclearyes">Yes, clear it</button>
+    <button type="button" class="ghost" id="bclearno">Keep my answers</button>
+  </div>
+  <p class="foot">Your answers are kept in this browser while you work, so you can close the page and finish later on the same device.</p>
+</section>
+
+</form>
+</main>
+</div>
+
+<script>
+
+/* ---------- build repeated form parts ---------- */
+const MATERIALS = ["Scissors","Glue","Paint","Crayons","Markers"];
+const DESCRIPTORS = [["Happy","Quiet","Affectionate to Family","Affectionate to others"],
+  ["Jealous","Shy","Outgoing","Calm","Easily excitable"],
+  ["Energetic","Relaxed","Nervous","Cries Easily"],
+  ["Mild Mannered","Easily Angered","Self Confident","Insecure"]];
+const AGREEMENTS = [
+  ["ag_emerg","I consent to emergency medical treatment for my child."],
+  ["ag_trips","I consent for my child to take part in neighborhood trips (library, park and playground) away from the program under proper supervision."],
+  ["ag_perm","I understand the program may need additional permissions for situations such as transportation, medication, release of information, and field trips."],
+  ["ag_needs","I have provided (or will provide) information on my child's special needs to the program to assist in caring for my child."],
+  ["ag_policy","I understand the program must give parents, at the time of enrollment, a written policy statement as required by regulation."],
+  ["ag_review","I agree to review and update this information whenever a change occurs and at least once a year."]];
+const slug = s => s.toLowerCase().replace(/[^a-z]+/g,"_");
+const el = (h) => { const t=document.createElement("template"); t.innerHTML=h.trim(); return t.content; };
+
+document.getElementById("materials").append(...MATERIALS.map(m=>el(`<label class="opt"><input type="checkbox" name="mat_${slug(m)}"><span>${m}</span></label>`)));
+document.getElementById("descriptors").append(...DESCRIPTORS.flat().map(m=>el(`<label class="opt"><input type="checkbox" name="desc_${slug(m)}"><span>${m}</span></label>`)));
+const ag = document.getElementById("agreements");
+AGREEMENTS.forEach(([k,t])=>ag.append(el(`<div class="yn"><p>${t}</p><div class="opts">
+  <label class="opt"><input type="radio" name="${k}" value="yes"><span>Yes</span></label>
+  <label class="opt"><input type="radio" name="${k}" value="no"><span>No</span></label></div></div>`)));
+const cc = document.getElementById("contacts");
+for (let i=1;i<=3;i++) cc.append(el(`<div class="contact"><h4>Emergency contact ${i}${i===3?' <small style="font-weight:400;color:var(--muted)">(optional)</small>':''}</h4><div class="grid">
+  <label class="f">Name<input type="text" id="ec${i}_name" name="ec${i}_name"></label>
+  <label class="f">Relationship to child<input type="text" id="ec${i}_rel" name="ec${i}_rel" placeholder="e.g. Grandmother, neighbor"></label>
+  <label class="f">Cell phone<input type="tel" id="ec${i}_cell" name="ec${i}_cell"></label>
+  <label class="f">Work or other phone<input type="tel" id="ec${i}_work" name="ec${i}_work"></label>
+  <label class="check"><input type="checkbox" name="ec${i}_cell_text"> OK to text the cell phone</label>
+  <label class="check"><input type="checkbox" name="ec${i}_work_text"> OK to text the other phone</label>
+  <label class="f">Email<input type="email" id="ec${i}_email" name="ec${i}_email"></label>
+  <label class="f">Address<input type="text" id="ec${i}_address" name="ec${i}_address"></label>
+  <fieldset class="full"><legend>Allowed to pick up your child?</legend><div class="opts">
+    <label class="opt"><input type="radio" name="ec${i}_pickup" value="yes"><span>Yes</span></label>
+    <label class="opt"><input type="radio" name="ec${i}_pickup" value="no"><span>No</span></label></div></fieldset>
+  </div></div>`));
+const pu = document.getElementById("pickups");
+for (let i=1;i<=2;i++) pu.append(el(`<div class="grid three" style="margin-top:${i>1?12:0}px">
+  <label class="f">Name<input type="text" id="pu${i}_name" name="pu${i}_name"></label>
+  <label class="f">Relationship<input type="text" id="pu${i}_rel" name="pu${i}_rel"></label>
+  <label class="f">Phone<input type="tel" id="pu${i}_phone" name="pu${i}_phone"></label></div>`));
+
+/* ---------- state ---------- */
+const form = document.getElementById("f");
+const KEY = "gncs-enrollment-draft-v1";
+function readForm(){
+  const d={};
+  for (const e of form.elements){
+    if(!e.name) continue;
+    if(e.type==="checkbox") d[e.name]=e.checked;
+    else if(e.type==="radio"){ if(e.checked) d[e.name]=e.value; else if(!(e.name in d)) d[e.name]=""; }
+    else d[e.name]=e.value.trim();
+  }
+  return d;
+}
+function writeForm(d){
+  for (const e of form.elements){
+    if(!e.name || !(e.name in d)) continue;
+    if(e.type==="checkbox") e.checked=!!d[e.name];
+    else if(e.type==="radio") e.checked = d[e.name]===e.value;
+    else e.value=d[e.name];
+  }
+}
+function syncVisibility(){
+  const d=readForm();
+  document.getElementById("p1_rel_other_wrap").hidden = !(d.p1_rel==="Relative"||d.p1_rel==="Other");
+  document.getElementById("p1_address_wrap").hidden = d.p1_same;
+  document.getElementById("p2_address_wrap").hidden = d.p2_same;
+  const sn = d.sn==="yes";
+  ["sn_detail","sn_other_wrap","sn_info_wrap"].forEach(id=>document.getElementById(id).hidden=!sn);
+}
+let saveT;
+form.addEventListener("input",()=>{ syncVisibility(); clearTimeout(saveT); saveT=setTimeout(()=>{ try{localStorage.setItem(KEY,JSON.stringify(readForm()))}catch(e){} },300); });
+form.addEventListener("change",syncVisibility);
+form.addEventListener("submit",e=>e.preventDefault());
+try{ const s=localStorage.getItem(KEY); if(s) writeForm(JSON.parse(s)); }catch(e){}
+if(!document.getElementById("sig_date").value){ const t=new Date(); document.getElementById("sig_date").value=`${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,"0")}-${String(t.getDate()).padStart(2,"0")}`; }
+syncVisibility();
+
+document.getElementById("bclear").onclick=()=>{document.getElementById("clearconfirm").hidden=false;};
+document.getElementById("bclearno").onclick=()=>{document.getElementById("clearconfirm").hidden=true;};
+document.getElementById("bclearyes").onclick=()=>{ form.reset(); try{localStorage.removeItem(KEY)}catch(e){} document.getElementById("clearconfirm").hidden=true; syncVisibility(); setStatus("All answers cleared."); };
+
+/* ---------- helpers ---------- */
+async function getFile(path){ const r=await fetch(path); if(!r.ok) throw new Error("Could not load "+path+" ("+r.status+")"); return new Uint8Array(await r.arrayBuffer()); }
+function fmtDate(iso){ if(!iso) return ""; const [y,m,d]=iso.split("-"); return `${m}/${d}/${y}`; }
+function dateParts(iso){ if(!iso) return ["","",""]; const [y,m,d]=iso.split("-"); return [m,d,y]; }
+function phoneParts(p){ const dg=(p||"").replace(/\D/g,""); const n = dg.length===11&&dg[0]==="1"?dg.slice(1):dg; return n.length===10?[n.slice(0,3),n.slice(3,6),n.slice(6)]:null; }
+function fmtPhone(p){ const q=phoneParts(p); return q?`(${q[0]}) ${q[1]}-${q[2]}`:(p||""); }
+const yes = v => v==="yes";
+function addressOf(d,n){ return d[`p${n}_same`] ? d.child_address : d[`p${n}_address`]; }
+function pickupList(d){
+  const out=[];
+  for(let i=1;i<=3;i++) if(d[`ec${i}_name`] && yes(d[`ec${i}_pickup`])) out.push({name:d[`ec${i}_name`],rel:d[`ec${i}_rel`],phone:fmtPhone(d[`ec${i}_cell`]||d[`ec${i}_work`])});
+  for(let i=1;i<=2;i++) if(d[`pu${i}_name`]) out.push({name:d[`pu${i}_name`],rel:d[`pu${i}_rel`],phone:fmtPhone(d[`pu${i}_phone`])});
+  return out;
+}
+
+/* ---------- OCFS-LDSS-0792: answers printed onto the original form ---------- */
+async function build0792(d){
+  const { PDFDocument, StandardFonts, rgb } = PDFLib;
+  const pdf = await PDFDocument.load(await getFile("OCFS-LDSS-0792.pdf"));
+  const page = pdf.getPages()[0];
+  const font = await pdf.embedFont(StandardFonts.Helvetica);
+  const ink = rgb(0.05,0.1,0.35);
+  const safe = s => Array.from(String(s||"")).map(ch=>{ try{ font.encodeText(ch); return ch; }catch(e){ return "?"; } }).join("");
+  // Coordinates use distance from the top of the page (points), matching the form's layout.
+  function text(s, x, base, maxW=400, size=8.5){
+    s=safe(s).replace(/\s+/g," ").trim(); if(!s) return;
+    let sz=size; while(sz>5.5 && font.widthOfTextAtSize(s,sz)>maxW) sz-=0.25;
+    while(font.widthOfTextAtSize(s,sz)>maxW && s.length>1) s=s.slice(0,-1);
+    page.drawText(s,{x,y:792-base,size:sz,font,color:ink});
+  }
+  function center(s,cx,base,size=8.5){ s=safe(s); if(!s) return; const w=font.widthOfTextAtSize(s,size); page.drawText(s,{x:cx-w/2,y:792-base,size,font,color:ink}); }
+  function wrap(s,maxW,size=8.5){ const words=safe(s).split(/\s+/).filter(Boolean); const lines=[]; let cur="";
+    for(const w of words){ const t=cur?cur+" "+w:w; if(font.widthOfTextAtSize(t,size)<=maxW) cur=t; else { if(cur) lines.push(cur); cur=w; } }
+    if(cur) lines.push(cur); return lines; }
+  function lines(s,x,bases,maxW,size=8){ const ls=wrap(s,maxW,size); bases.forEach((b,i)=>{ if(i<ls.length){ let t=ls[i]; if(i===bases.length-1 && ls.length>bases.length) t=ls.slice(i).join(" "); text(t,x,b,maxW,size); } }); }
+  function box(x,top,size){ const p=1.2; page.drawLine({start:{x:x+p,y:792-top-p},end:{x:x+size-p,y:792-top-size+p},thickness:1.1,color:ink});
+    page.drawLine({start:{x:x+p,y:792-top-size+p},end:{x:x+size-p,y:792-top-p},thickness:1.1,color:ink}); }
+  function phone(p,areaCx,exchCx,lineX,base,fallbackX,fallbackW){
+    const q=phoneParts(p); if(q){ center(q[0],areaCx,base); center(q[1],exchCx,base); text(q[2],lineX,base,30); }
+    else if(p) text(p,fallbackX,base,fallbackW,7.5);
+  }
+  function date(iso,mCx,dCx,yX,base){ const [m,dd,y]=dateParts(iso); center(m,mCx,base); center(dd,dCx,base); text(y,yX,base,30); }
+
+  // FRONT — program
+  text("Great Neck Community School",140,89.4,143);
+  text("225 Schenck Avenue, Great Neck, NY 11021",293,89.4,193);
+  phone("516-482-5005",508,536,557,89.4);
+  // child
+  text(d.child_name,228,102.6,204);
+  text(d.child_nick,268,115.0,164);
+  date(d.child_dob,452,481,503,111.2);
+  text(d.child_gender,543,111.2,46);
+  text(d.child_address,140,135.0,448);
+  // person enrolling
+  text(d.p1_name,140,157.8,184);
+  const rel={Parent:[333.2,151.7],Guardian:[374.9,151.7],Caretaker:[425.9,151.7],Relative:[477.0,151.7],Other:[333.2,163.9]}[d.p1_rel];
+  if(rel) box(rel[0],rel[1],7);
+  if(d.p1_rel==="Relative") text(d.p1_rel_other,524,158.2,64,7.5);
+  if(d.p1_rel==="Other") text(d.p1_rel_other,372,170.4,214);
+  phone(d.p1_cell,50,74.5,96,191.2,33,225);
+  if(d.p1_cell && d.p1_text) box(269.8,183.7,8);
+  if(d.p1_work) text("Work: "+fmtPhone(d.p1_work),130,191.2,135,7.5);
+  text(d.p1_email,98,203.8,226);
+  if(!d.p1_same && d.p1_address) lines(d.p1_address,334,[191.5,202.5],254);
+  // emergency contacts: rows start at 233, 273, 313
+  for(let i=1;i<=3;i++){
+    const o=(i-1)*40.3, n=d[`ec${i}_name`];
+    if(!n && !d[`ec${i}_cell`]) continue;
+    const who = n + (d[`ec${i}_rel`] ? ` (${d[`ec${i}_rel`]})` : "");
+    if(i===1) text(who,127,241.4,138); else text(who,53,241.4+o,212);
+    lines(d[`ec${i}_address`],53,[252.6+o,263.6+o],212,8);
+    const pk=d[`ec${i}_pickup`]; if(pk==="yes") box(274.7,240.1+o,5.8); else if(pk==="no") box(302.6,240.1+o,5.8);
+    const pb=[242.6,282.9,323.1][i-1];
+    phone(d[`ec${i}_cell`],351,377,399,pb,334,106);
+    if(d[`ec${i}_cell`] && d[`ec${i}_cell_text`]) box(333.2,[248.3,288.7,328.9][i-1],7);
+    phone(d[`ec${i}_work`],468,494.5,516,[243.6,282.9,323.1][i-1],451,138);
+    if(d[`ec${i}_work`] && d[`ec${i}_work_text`]) box(450.2,[249.3,288.7,328.9][i-1],7);
+    text(d[`ec${i}_email`],451,[267.0,307.3,347.6][i-1],138,7.5);
+  }
+  // REVERSE
+  text(d.child_name,33,442.2,408);
+  date(d.child_dob,465,492.5,515,442.2);
+  if(d.sn==="no") box(402.6,450.8,7);
+  if(yes(d.sn)){ if(d.sn_ei) box(31.9,464.2,7); if(d.sn_ot) box(193.2,464.2,7); if(d.sn_speech) box(303.5,464.2,7); if(d.sn_pt) box(402.6,464.2,7);
+    if(d.sn_other){ box(31.9,490.6,7); text(d.sn_other,73,497.4,500); } }
+  if(d.allergies){ box(31.9,477.4,7); text(d.allergies,124,484.3,452); }
+  if(yes(d.sn)) text(d.sn_info,326,510.6,262,7.5);
+  text(d.ped_name,33,534.0,434); phone(d.ped_phone,492,519.5,541,533.9,476,112);
+  text(d.hospital,33,556.8,434); phone(d.hospital_phone,492,519.5,541,556.6,476,112);
+  text(d.dentist,33,579.5,434); phone(d.dentist_phone,492,519.5,541,579.4,476,112);
+  const agTops=[625.5,651.9,674.3,690.6,709.9,726.2];
+  ["ag_emerg","ag_trips","ag_perm","ag_needs","ag_policy","ag_review"].forEach((k,i)=>{ if(d[k]==="yes") box(531.2,agTops[i],8); else if(d[k]==="no") box(567.2,agTops[i],8); });
+  if(d.sig_name){ text(d.sig_name,40,757.0,420,10); }
+  date(d.sig_date,489,517.5,540,757.0);
+  pdf.setTitle("OCFS-LDSS-0792 Day Care Enrollment" + (d.child_name?` - ${d.child_name}`:""));
+  return pdf.save();
+}
+
+/* ---------- New Student Information Form: rebuilt in the school's layout ---------- */
+async function buildNSIF(d){
+  const { PDFDocument, rgb } = PDFLib;
+  const pdf = await PDFDocument.create();
+  pdf.registerFontkit(fontkit);
+  const R = await pdf.embedFont(await getFile("bonum-regular.ttf"),{subset:true});
+  const B = await pdf.embedFont(await getFile("bonum-bold.ttf"),{subset:true});
+  const BLACK=rgb(0,0,0), BLUE=rgb(0x44/255,0x72/255,0xC4/255), INK=rgb(0.08,0.12,0.4);
+  const L=72, RT=540, TOP=48, BOT=56, SZ=9.5, LH=19;
+  const glyphs = new Set(); // keep text inside the embedded character set
+  const safe = s => String(s||"").replace(/[‘’]/g,"'").replace(/[“”]/g,'"').replace(/[^ -ſ‐-›€]/g,"?");
+  let page, y;
+  const W = (s,f=R,sz=SZ) => f.widthOfTextAtSize(safe(s),sz);
+  function newPage(){ page=pdf.addPage([612,792]); y=792-TOP; }
+  function need(h){ if(y-h < BOT) newPage(); }
+  function draw(s,x,yy,{f=R,sz=SZ,color=BLACK}={}){ s=safe(s); if(s) page.drawText(s,{x,y:yy,size:sz,font:f,color}); }
+  function rule(x1,x2,yy,color=BLACK){ page.drawLine({start:{x:x1,y:yy-2.5},end:{x:x2,y:yy-2.5},thickness:.6,color}); }
+  function wrapText(s,maxW,f=R,sz=SZ){ const out=[]; for(const para of safe(s).split(/\n/)){ const words=para.split(/\s+/).filter(Boolean); let cur="";
+      for(const w of words){ const t=cur?cur+" "+w:w; if(f.widthOfTextAtSize(t,sz)<=maxW) cur=t; else { if(cur) out.push(cur); cur=w; } } if(cur) out.push(cur); } return out; }
+  function header(){
+    need(80);
+    ["Great Neck Community School","225 Schenck Avenue","Great Neck, NY 11021","516-482-5005"].forEach((t,i)=>{ draw(t,306-W(t)/2,y); y-=12; });
+    const u="www.gncommunityschool.org"; draw(u,306-W(u)/2,y,{color:BLUE}); rule(306-W(u)/2,306+W(u)/2,y+1.5,BLUE); y-=30;
+  }
+  function para(s,{f=R,color=BLACK,sz=SZ,gap=6,x=L}={}){ const ls=wrapText(s,RT-x,f,sz); need(ls.length*12.5+gap); ls.forEach(l=>{ draw(l,x,y,{f,sz,color}); y-=12.5; }); y-=gap; }
+  function heading(s,{center=false,underline=false,gap=8}={}){ need(LH+gap); const x=center?306-W(s,B)/2:L; draw(s,x,y,{f:B}); if(underline) rule(x,x+W(s,B),y+1); y-=LH+gap-6; }
+  // A label followed by an answer on an underline; long answers continue on more underlined lines.
+  function field(label,value,{x=L,to=RT,minLines=1,f=R,color=BLACK,lineColor=BLACK}={}){
+    const lw=W(label,f)+5, first=to-(x+lw);
+    const words=safe(value).split(/\s+/).filter(Boolean); const ls=[]; let cur="", cap=first;
+    for(const w of words){ const t=cur?cur+" "+w:w; if(R.widthOfTextAtSize(t,SZ)<=cap-6) cur=t; else { ls.push(cur); cur=w; cap=to-x; } }
+    if(cur||!ls.length) ls.push(cur);
+    while(ls.length<minLines) ls.push("");
+    need(LH*ls.length);
+    draw(label,x,y,{f,color}); rule(x+lw,to,y,lineColor); draw(ls[0],x+lw+3,y+1,{color:INK}); y-=LH;
+    for(let i=1;i<ls.length;i++){ rule(x,to,y,lineColor); draw(ls[i],x+3,y+1,{color:INK}); y-=LH; }
+  }
+  // Several label/answer pairs on one line, e.g. CHILD'S NAME ____ DATE OF BIRTH ____
+  function row(items,{x=L,to=RT}={}){
+    { const total=items.reduce((a,it)=>a+(it.w||1),0); const span=to-x;
+      const tooLong=items.some(it=>{ const seg=span*(it.w||1)/total; return R.widthOfTextAtSize(safe(it.value),SZ) > seg-10-W(it.label,it.f||R)-9; });
+      if(tooLong){ items.forEach(it=>field(it.label,it.value,{x,to})); return; } }
+    need(LH); let cx=x; const total=items.reduce((a,it)=>a+(it.w||1),0); const span=to-x;
+    items.forEach(it=>{ const seg=span*(it.w||1)/total; const lw=W(it.label,it.f||R)+5; draw(it.label,cx,y,{f:it.f||R});
+      const end=cx+seg-10; rule(cx+lw,end,y); let v=safe(it.value);
+      while(v && R.widthOfTextAtSize(v,SZ)>end-cx-lw-4) v=v.slice(0,-1);
+      draw(v,cx+lw+3,y+1,{color:INK}); cx+=seg; });
+    y-=LH;
+  }
+  const X = v => v ? "X" : "";
+  const yn = v => [{label:"YES:",value:X(v==="yes"),w:1},{label:"NO:",value:X(v==="no"),w:1}];
+  const childLine = () => { need(LH+8); draw("CHILD'S NAME:",L,y,{f:B}); const lw=W("CHILD'S NAME:",B)+5; rule(L+lw,L+lw+170,y); draw(d.child_name,L+lw+3,y+1,{color:INK}); y-=LH+10; };
+
+  // Page 1 — child and parents
+  newPage(); header();
+  row([{label:"CHILD'S NAME:",value:d.child_name,w:1.7},{label:"DATE OF BIRTH:",value:fmtDate(d.child_dob),w:1.2}]);
+  row([{label:"GENDER:",value:d.child_gender,w:1}],{to:L+170});
+  y-=10;
+  para("PLEASE FILL IN THE NAMES OF BOTH PARENTS/GUARDIANS IF THERE IS MORE THAN ONE.  GUARDIANS ARE LEGAL GUARDIANS.  PLEASE WRITE GRANDPARENTS OR OTHER RELATIVES IN EMERGENCY CONTACTS IF YOU WANT TO LIST THEM AS CONTACTS.",{f:B,color:BLUE,sz:8.5,gap:16});
+  for(const n of [1,2]){
+    field("PARENT/GUARDIAN NAME:",d[`p${n}_name`]);
+    const ind={x:L+36};
+    field("HOME ADDRESS:",d[`p${n}_name`]?addressOf(d,n):"",ind);
+    field("CELL PHONE NUMBER:",fmtPhone(d[`p${n}_cell`]),ind);
+    field("WORK PHONE NUMBER:",fmtPhone(d[`p${n}_work`]),ind);
+    field("EMAIL ADDRESS:",d[`p${n}_email`],ind);
+    field("OCCUPATION:",d[`p${n}_occ`],ind);
+    y-=14;
+  }
+
+  // Page 2 — student information and social history
+  newPage(); header(); childLine();
+  heading("STUDENT INFORMATION");
+  field("CHILD'S PREFERRED NAME/NICKNAME:",d.child_nick);
+  row([{label:"STUDENT PROGRAM:  TWOS:",value:X(d.program==="twos"),w:1.9},{label:"THREES:",value:X(d.program==="threes"),w:1},{label:"FOURS:",value:X(d.program==="fours"),w:1}]);
+  row([{label:"GENDER:",value:d.child_gender}],{to:L+170});
+  field("PREVIOUS GROUP/SCHOOL EXPERIENCE:",d.prev_school,{minLines:2});
+  field("PRIMARY LANGUAGE SPOKEN AT HOME:",d.language);
+  field("SIBLINGS NAME AND AGES:",d.siblings);
+  row([{label:"IS YOUR CHILD TOILET TRAINED?  YES:",value:X(d.toilet==="yes"),w:2.6},{label:"NO:",value:X(d.toilet==="no"),w:1}],{to:L+320});
+  row([{label:"IS YOUR CHILD ADOPTED?         YES:",value:X(d.adopted==="yes"),w:2.6},{label:"NO:",value:X(d.adopted==="no"),w:1}],{to:L+320});
+  y-=4;
+  row([{label:"DOES YOUR CHILD HAVE ANY SPECIAL NEEDS/SERVICES:  YES:",value:X(d.sn==="yes"),w:4},{label:"NO:",value:X(d.sn==="no"),w:1}]);
+  need(LH); draw("IF YES, PLEASE CHECK THE APPROPRIATE BOXES BELOW:",L,y); y-=LH;
+  const sn=yes(d.sn);
+  row([{label:"EARLY INTERVENTION/SPECIAL EDUCATION:",value:X(sn&&d.sn_ei)}],{to:L+300});
+  row([{label:"OCCUPATIONAL THERAPY:",value:X(sn&&d.sn_ot),w:1},{label:"SPEECH/LANGUAGE:",value:X(sn&&d.sn_speech),w:1}]);
+  row([{label:"PHYSICAL THERAPY:",value:X(sn&&d.sn_pt)}],{to:L+230});
+  if(sn && (d.sn_other||d.sn_info)) field("OTHER / DETAILS:",[d.sn_other,d.sn_info].filter(Boolean).join(". "));
+  y-=6; heading("SOCIAL HISTORY");
+  field("Please describe how your child acts when you leave him/her?",d.soc_leave,{minLines:3});
+  field("Who do you leave your child with when you go out?",d.soc_who,{minLines:2});
+  field("What type of reaction do you think your child will have when you drop him/her off at school?",d.soc_reaction,{minLines:3});
+  field("How often do you leave your child?",d.soc_often,{minLines:2});
+  need(LH*2); draw("Please let us know which materials your child has worked with before:",L,y); y-=LH;
+  row(MATERIALS.map(m=>({label:m+":",value:X(d[`mat_${slug(m)}`])})));
+
+  // Page 3 — personality, sleep, toileting
+  newPage(); childLine(); y-=6;
+  para("Please check off the words that most accurately describe your child.  Feel free to add additional descriptors below:",{gap:10});
+  DESCRIPTORS.forEach(r=>row(r.map(m=>({label:m+":",value:X(d[`desc_${slug(m)}`]),w:Math.max(1,(m.length+4)/10)}))));
+  field("Other:",d.desc_other);
+  y-=8;
+  row([{label:"Does your child sleep through the night?  Yes:",value:X(d.sleep_night==="yes"),w:3.2},{label:"No:",value:X(d.sleep_night==="no"),w:1}],{to:L+360});
+  row([{label:"Does your child nap during the day?         Yes:",value:X(d.nap==="yes"),w:3.2},{label:"No:",value:X(d.nap==="no"),w:1}],{to:L+360});
+  row([{label:"If yes, at what time does your child nap?",value:d.nap_time,w:1.5},{label:"How long does your child nap?",value:d.nap_length,w:1.2}]);
+  y-=8;
+  field("What word does your child use to describe urination?",d.word_urine);
+  field("What word does your child use to describe a bowel movement?",d.word_bm);
+  row([{label:"Is your child toilet trained?  Yes:",value:X(d.toilet==="yes"),w:2.4},{label:"No:",value:X(d.toilet==="no"),w:1}],{to:L+300});
+  field("At what age was your child toilet trained?",d.toilet_age,{to:L+320});
+  row([{label:"Does your child ever have accidents?  Yes:",value:X(d.accidents==="yes"),w:2.9},{label:"No:",value:X(d.accidents==="no"),w:1}],{to:L+340});
+  y-=8;
+  field("What discipline methods do you use at home?",d.discipline,{minLines:3});
+  field("Is there anything else that you would like us to know about your child?",d.anything,{minLines:4});
+
+  // Page 4 — pick-up and agreements
+  newPage(); childLine(); header();
+  heading("INDIVIDUALS AUTHORIZED TO PICK UP CHILD");
+  const pl=pickupList(d); while(pl.length<3) pl.push({name:"",rel:"",phone:""});
+  pl.forEach((p,i)=>{ field(`${i+1}. NAME:`,p.name); field("RELATIONSHIP TO CHILD:",p.rel,{x:L+18}); field("PHONE:",p.phone,{x:L+18}); y-=4; });
+  y-=8; heading("AGREEMENTS",{underline:true});
+  [["ag_emerg","I consent to emergency medical treatment for my child:"],
+   ["ag_perm","I understand that the program may need additional permissions for situations such as transportation, medication, release of information and field trips:"],
+   ["ag_needs","I will provide information to the program on my child's special need to assist in caring for my child:"],
+   ["ag_policy","I understand that the program must give parents, at the beginning of the school year, a written policy statement as required by regulations:"]]
+   .forEach(([k,t])=>{ para(t,{gap:2}); row(yn(d[k]),{to:L+170}); y-=2; });
+  para("I agree to review and update this information whenever change occurs and at least once a year at the beginning of the school year and/or summer program if applicable:",{gap:4});
+  field("PARENT SIGNATURE:",d.sig_name,{to:L+330});
+  y-=4; field("DATE:",fmtDate(d.sig_date),{to:L+160});
+
+  // Page 5 — emergency contacts
+  newPage(); childLine();
+  heading("GREAT NECK COMMUNITY SCHOOL",{center:true,gap:2});
+  heading("EMERGENCY CONTACT FORM",{center:true,gap:10});
+  para("WE WILL ALWAYS TRY TO REACH THE PARENTS/GUARDIANS FIRST IN CASE OF EMERGENCY.  EMERGENCY CONTACTS NEED TO BE SOMEONE OTHER THAN A PARENT AND CAN BE A RELATIVE, FRIEND OR NEIGHBOR. PLEASE LIST AT LEAST TWO PEOPLE WHO CAN BE CONTACTED IN CASE OF AN EMERGENCY IN CASE THE PARENTS CANNOT BE REACHED.",{f:B,color:BLUE,sz:8.5,gap:16});
+  heading("EMERGENCY CONTACTS");
+  for(let i=1;i<=3;i++){
+    need(LH*6); draw(`EMERGENCY CONTACT #${i}`,L,y); y-=LH+2;
+    row([{label:"NAME:",value:d[`ec${i}_name`],w:1.5},{label:"RELATIONSHIP:",value:d[`ec${i}_rel`],w:1.2}]);
+    row([{label:"AUTHORIZED PICK UP:  YES:",value:X(d[`ec${i}_pickup`]==="yes"),w:2.2},{label:"NO:",value:X(d[`ec${i}_pickup`]==="no"),w:1}],{to:L+300});
+    row([{label:"CELL PHONE:",value:fmtPhone(d[`ec${i}_cell`])},{label:"WORK PHONE:",value:fmtPhone(d[`ec${i}_work`])}]);
+    field("ADDRESS:",d[`ec${i}_address`]);
+    y-=12;
+  }
+
+  // Page 6 — medical
+  newPage(); childLine();
+  heading("MEDICAL INFORMATION");
+  row([{label:"PEDIATRICIAN NAME:",value:d.ped_name,w:1.5},{label:"EMAIL:",value:d.ped_email,w:1.1}]);
+  field("ADDRESS:",d.ped_address);
+  row([{label:"PHONE:",value:fmtPhone(d.ped_phone),w:1},{label:"PREFERRED HOSPITAL:",value:d.hospital,w:1.5}]);
+  y-=10;
+  para("PLEASE LET US KNOW IF YOUR CHILD HAS ANY ALLERGIES AND IF AN EPIPEN OR BENADRYL IS INDICATED.  WE WILL CONTACT YOU REGARDING THE REQUIRED FORMS IF YOUR CHILD REQUIRES AN EPIPEN AND/OR BENADRYL.",{f:B,color:BLUE,sz:8.5,gap:10});
+  field("ALLERGY:",d.allergies);
+  row([{label:"EPIPEN:   YES:",value:X(d.epipen==="yes"),w:1.6},{label:"NO:",value:X(d.epipen==="no"),w:1}],{x:L+24,to:L+260});
+  row([{label:"BENADRYL: YES:",value:X(d.benadryl==="yes"),w:1.6},{label:"NO:",value:X(d.benadryl==="no"),w:1}],{x:L+24,to:L+260});
+  y-=8;
+  para("PLEASE DESCRIBE THE SYMPTOMS THAT YOUR CHILD EXHIBITS WHEN HE OR SHE IS HAVING AN ALLERGIC REACTION:",{f:B,color:BLUE,sz:8.5,gap:4});
+  field("",d.al_symptoms,{minLines:4,lineColor:BLUE});
+  y-=8;
+  para("MEDICAL CONDITIONS: PLEASE LIST ANY MEDICAL CONDITIONS THAT YOUR CHILD MAY HAVE AND IF THERE ARE ANY TREATMENTS INDICATED.",{gap:10});
+  field("MEDICAL CONDITIONS:",d.med_conditions,{minLines:4,lineColor:BLUE});
+  y-=6;
+  field("TREATMENT:",d.med_treatment,{minLines:4,lineColor:BLUE});
+
+  pdf.setTitle("New Student Information Form" + (d.child_name?` - ${d.child_name}`:""));
+  return pdf.save();
+}
+
+/* ---------- saving ---------- */
+const statusEl=document.getElementById("status");
+function setStatus(t){ statusEl.textContent=t; }
+function checkMissing(d){
+  const m=[]; const need=(k,l,a)=>{ if(!d[k]) m.push(`<a href="#${a}">${l}</a>`); };
+  need("child_name","child's name","child"); need("child_dob","date of birth","child"); need("child_address","home address","child");
+  need("p1_name","parent/guardian name","parents"); need("p1_rel","relationship to child","parents"); need("p1_cell","parent cell phone","parents");
+  if(!d.ec1_name || !d.ec2_name) m.push(`<a href="#emergency">two emergency contacts</a>`);
+  const box=document.getElementById("missing");
+  if(m.length){ box.innerHTML="Still blank: "+m.join(", ")+". You can still create the forms and fill these in by hand."; box.hidden=false; } else box.hidden=true;
+}
+const fileBase = d => (d.child_name||"Child").replace(/[^\w\- ]+/g,"").trim().replace(/\s+/g,"-");
+async function saveFile(kind,btn){
+  const d=readForm(); checkMissing(d);
+  btn.disabled=true; setStatus("Creating the PDF…");
+  try{
+    const bytes = kind==="0792" ? await build0792(d) : await buildNSIF(d);
+    const filename = kind==="0792" ? `OCFS-LDSS-0792 Day Care Enrollment - ${fileBase(d)}.pdf` : `New Student Information Form - ${fileBase(d)}.pdf`;
+    window.__lastPdf = {kind, bytes};
+    const url=URL.createObjectURL(new Blob([bytes],{type:"application/pdf"}));
+    const a=document.createElement("a"); a.href=url; a.download=filename; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),60000);
+    setStatus(`Created “${filename}”. Check your Downloads folder.`);
+  }catch(e){
+    setStatus("Something went wrong creating the PDF: "+(e&&e.message||e)); console.error(e);
+  }finally{ btn.disabled=false; }
+}
+document.getElementById("b0792").onclick=e=>saveFile("0792",e.currentTarget);
+document.getElementById("bnsif").onclick=e=>saveFile("nsif",e.currentTarget);
+window.__build={build0792,buildNSIF,writeForm,readForm};
+</script>
+
+</body>
+</html>
